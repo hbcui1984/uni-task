@@ -1,0 +1,88 @@
+{
+	"bsonType": "object",
+	"required": ["action_type", "task_id", "project_id", "user_id", "action_detail", "create_time"],
+	"permission": {
+		"read": "auth.uid != null",
+		"create": "auth.uid != null",
+		"update": false,
+		"delete": "auth.uid == doc.user_id"
+	},
+	"indexes": [{
+		"IndexName": "project_time",
+		"MgoKeySchema": {
+			"MgoIndexKeys": [{
+				"Name": "project_id",
+				"Direction": "1"
+			}, {
+				"Name": "create_time",
+				"Direction": "-1"
+			}],
+			"MgoIsUnique": false
+		}
+	}, {
+		"IndexName": "user_time",
+		"MgoKeySchema": {
+			"MgoIndexKeys": [{
+				"Name": "user_id",
+				"Direction": "1"
+			}, {
+				"Name": "create_time",
+				"Direction": "-1"
+			}],
+			"MgoIsUnique": false
+		}
+	}, {
+		"IndexName": "task_time",
+		"MgoKeySchema": {
+			"MgoIndexKeys": [{
+				"Name": "task_id",
+				"Direction": "1"
+			}, {
+				"Name": "create_time",
+				"Direction": "-1"
+			}],
+			"MgoIsUnique": false
+		}
+	}],
+	"properties": {
+		"_id": {
+			"description": "ID，系统自动生成"
+		},
+		"action_type": {
+			"bsonType": "string",
+			"description": "动作类型：create-创建任务, update-更新任务, delete-删除任务, complete-完成任务",
+			"enum": ["create", "update", "delete", "complete"]
+		},
+		"task_id": {
+			"bsonType": "string",
+			"description": "任务ID",
+			"foreignKey": "opendb-task._id"
+		},
+		"project_id": {
+			"bsonType": "string",
+			"description": "项目ID",
+			"foreignKey": "opendb-projects._id"
+		},
+		"task_name": {
+			"bsonType": "string",
+			"description": "任务名称"
+		},
+		"user_id": {
+			"bsonType": "string",
+			"description": "操作用户ID",
+			"foreignKey": "uni-id-users._id"
+		},
+		"action_detail": {
+			"bsonType": "string",
+			"description": "动作详情"
+		},
+		"extra_data": {
+			"bsonType": "object",
+			"description": "额外数据，如变更前后的数据"
+		},
+		"create_time": {
+			"bsonType": "timestamp",
+			"description": "创建时间"
+		}
+	}
+}

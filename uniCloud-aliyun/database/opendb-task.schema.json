@@ -1,0 +1,178 @@
+// 文档教程: https://uniapp.dcloud.net.cn/uniCloud/schema
+{
+	"bsonType": "object",
+	"required": ["title","project_id"],
+	"permission": {
+		"read": "auth.uid != null",
+		"create": "auth.uid != null",
+		"update": "auth.uid != null",
+		"delete": "auth.uid != null"
+	},
+	"indexes": [{
+		"IndexName": "project_status",
+		"MgoKeySchema": {
+			"MgoIndexKeys": [{
+				"Name": "project_id",
+				"Direction": "1"
+			}, {
+				"Name": "status",
+				"Direction": "1"
+			}],
+			"MgoIsUnique": false
+		}
+	}, {
+		"IndexName": "assignee_status",
+		"MgoKeySchema": {
+			"MgoIndexKeys": [{
+				"Name": "assignee",
+				"Direction": "1"
+			}, {
+				"Name": "status",
+				"Direction": "1"
+			}],
+			"MgoIsUnique": false
+		}
+	}, {
+		"IndexName": "deadline",
+		"MgoKeySchema": {
+			"MgoIndexKeys": [{
+				"Name": "deadline",
+				"Direction": "1"
+			}],
+			"MgoIsUnique": false
+		}
+	}, {
+		"IndexName": "parent_id",
+		"MgoKeySchema": {
+			"MgoIndexKeys": [{
+				"Name": "parent_id",
+				"Direction": "1"
+			}],
+			"MgoIsUnique": false
+		}
+	}, {
+		"IndexName": "create_date",
+		"MgoKeySchema": {
+			"MgoIndexKeys": [{
+				"Name": "create_date",
+				"Direction": "-1"
+			}],
+			"MgoIsUnique": false
+		}
+	}],
+	"properties": {
+		"_id": {
+			"description": "ID，系统自动生成"
+		},
+		"parent_id": {
+			"bsonType": "string",
+			"description": "父任务ID",
+			"parentKey": "_id"
+		},
+		"project_id": {
+			"description": "项目ID",
+			"foreignKey": "opendb-projects._id"
+		},
+		"group_id": {
+			"description": "分组ID",
+			"foreignKey": "task-group._id"
+		},
+		"title": {
+			"bsonType": "string",
+			"title": "标题",
+			"description": "任务标题",
+			"label": "标题",
+			"trim": "both",
+			"minLength": 3
+		},
+		"content": {
+			"bsonType": "string",
+			"title": "任务详情",
+			"description": "任务详情",
+			"label": "任务详情",
+			"trim": "right",
+			"component": {
+				"name": "textarea",
+				"props": {
+					"placeholder": "这里可输入详细描述"
+				}
+			}
+		},
+		"assignee": {
+			"bsonType": "string",
+			"description": "负责人ID， 参考`uni-id-users` 表",
+			"foreignKey": "uni-id-users._id"
+		},
+		"deadline": {
+			"bsonType": "timestamp",
+			"title": "截止日期"
+		},
+		"priority": {
+			"bsonType": "int",
+			"title": "优先级",
+			"enum": [{
+					"value": 0,
+					"text": "较低"
+				},
+				{
+					"value": 1,
+					"text": "普通"
+				},
+				{
+					"value": 2,
+					"text": "较高"
+				},
+				{
+					"value": 3,
+					"text": "最高"
+				}
+			],
+			"defaultValue": 1
+		},
+		"order":{
+			"bsonType": "int",
+			"title": "序号"
+		},
+		"status": {
+			"bsonType": "int",
+			"description": "任务状态",
+			"title": "任务状态",
+			"enum": [{
+					"value": 0,
+					"text": "未开始"
+				},
+				{
+					"value": 1,
+					"text": "进行中"
+				},
+				{
+					"value": 2,
+					"text": "已完成"
+				}
+			],
+			"defaultValue": 0
+
+		},
+		"attachments":{
+			"bsonType": "array",
+			"description": "附件"
+		},
+		"completion_uid":{
+			"bsonType": "string",
+			"description": "完成人的uid， 参考`uni-id-users` 表",
+			"foreignKey": "uni-id-users._id"
+		},
+		"completion_date":{
+			"bsonType": "timestamp",
+			"description": "任务完成时间"
+		},
+		"create_date": {
+			"bsonType": "timestamp",
+			"title": "创建时间",
+			"description": "创建时间",
+			"forceDefaultValue": {
+				"$env": "now"
+			}
+		}
+	}
+}

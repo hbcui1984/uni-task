@@ -1,0 +1,99 @@
+// 文档教程: https://uniapp.dcloud.net.cn/uniCloud/schema
+{
+	"bsonType": "object",
+	"required": ["name"],
+	"permission": {
+		"read": "auth.uid != null",
+		"create": "auth.uid != null",
+		"update": "auth.uid != null",
+		"delete": false
+	},
+	"indexes": [{
+		"IndexName": "managers",
+		"MgoKeySchema": {
+			"MgoIndexKeys": [{
+				"Name": "managers",
+				"Direction": "1"
+			}],
+			"MgoIsUnique": false
+		}
+	}, {
+		"IndexName": "members",
+		"MgoKeySchema": {
+			"MgoIndexKeys": [{
+				"Name": "members",
+				"Direction": "1"
+			}],
+			"MgoIsUnique": false
+		}
+	}],
+	"properties": {
+		"_id": {
+			"description": "ID，系统自动生成"
+		},
+		"name": {
+			"bsonType": "string",
+			"title": "项目名称",
+			"description": "项目名称",
+			"trim": "both",
+			"minLength": 2,
+			"maxLength": 50
+		},
+		"description": {
+			"bsonType": "string",
+			"title": "项目描述",
+			"description": "项目描述",
+			"trim": "both",
+			"maxLength": 500
+		},
+		"cover": {
+			"bsonType": "object",
+			"title": "项目封面/图标",
+			"description": "项目封面图片或图标信息",
+			"properties": {
+				"url": {
+					"bsonType": "string",
+					"title": "图片URL"
+				},
+				"name": {
+					"bsonType": "string",
+					"title": "图片名称"
+				},
+				"size": {
+					"bsonType": "number",
+					"title": "图片大小（字节）"
+				}
+			}
+		},
+		"archived": {
+			"bsonType": "bool",
+			"title": "是否已归档",
+			"description": "归档的项目不显示在活跃项目列表中",
+			"defaultValue": false
+		},
+		"archived_date": {
+			"bsonType": "timestamp",
+			"title": "归档时间",
+			"description": "项目归档的时间戳"
+		},
+		"managers":{
+		    "bsonType":"array",
+		    "description":"项目管理员 uid 列表"
+		},
+		"members": {
+			"bsonType": "array",
+			"title": "项目成员 uid 列表"
+		},
+		"invite_code": {
+			"bsonType": "string",
+			"title": "邀请码",
+			"description": "项目邀请码，用于新成员加入项目",
+			"trim": "both"
+		},
+		"invite_code_expires": {
+			"bsonType": "timestamp",
+			"title": "邀请码过期时间",
+			"description": "邀请码的有效期截止时间"
+		}
+	}
+}

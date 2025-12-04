@@ -1,0 +1,46 @@
+// 文档教程: https://uniapp.dcloud.net.cn/uniCloud/schema
+{
+	"bsonType": "object",
+	"required": [],
+	"permission": {
+		"read": true,
+		"create": true,
+		"update": true,
+		"delete": true
+	},
+	"properties": {
+		"_id": {
+			"description": "ID，系统自动生成"
+		},
+		"name": {
+			"bsonType": "string",
+			"title": "分组名称"
+		},
+		"project_id":{
+			"bsonType": "string",
+			"foreignKey": "opendb-projects._id"
+		},
+		"order":{
+			"bsonType": "int",
+			"title": "序号"
+		},
+		"archived": {
+			"bsonType": "bool",
+			"title": "是否已归档",
+			"description": "归档的分组不显示在活跃列表中",
+			"defaultValue": false
+		},
+		"archived_date": {
+			"bsonType": "timestamp",
+			"title": "归档时间"
+		},
+		"create_date": {
+			"bsonType": "timestamp",
+			"title": "创建时间",
+			"description": "创建时间",
+			"forceDefaultValue": {
+				"$env": "now"
+			}
+		}
+	}
+}
