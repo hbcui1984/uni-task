@@ -173,13 +173,13 @@ const db = uniCloud.database();
 const dbCollectionName = 'opendb-task';
 
 function getValidator(fields) {
-	let reuslt = {}
+	let result = {}
 	for (let key in validator) {
 		if (fields.indexOf(key) > -1) {
-			reuslt[key] = validator[key]
+			result[key] = validator[key]
 		}
 	}
-	return reuslt
+	return result
 }
 
 function getDate(type) {

@@ -12,8 +12,8 @@
 <template>
 	<view class="about">
 		<view class="box">
-			<image class="logoImg" :src="about.logo"></image>
-			<text class="tip appName">{{about.appName}}</text>
+			<image class="logo-img" :src="about.logo"></image>
+			<text class="tip app-name">{{about.appName}}</text>
 			<text class="tip">Version {{version}}</text>
 			<view class="qrcode">
 				<!--uqrcode 组件来源，插件Sansnn-uQRCode 链接地址：https://ext.dcloud.net.cn/plugin?id=1287-->
@@ -190,7 +190,7 @@
 		align-items: center;
 	}
 
-	.logoImg {
+	.logo-img {
 		margin-bottom: 10rpx;
 		width: 160rpx;
 		height: 160rpx;
@@ -204,7 +204,7 @@
 		padding: 10rpx;
 	}
 
-	.appName {
+	.app-name {
 		margin-top: 20px;
 		font-size: 42rpx;
 		font-weight: 500;

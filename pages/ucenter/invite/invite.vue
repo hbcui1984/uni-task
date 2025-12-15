@@ -12,8 +12,8 @@
 <template>
 	<view class="about">
 		<view class="box">
-			<image class="logoImg" :src="about.logo"></image>
-			<text class="tip appName">{{about.appName}}</text>
+			<image class="logo-img" :src="about.logo"></image>
+			<text class="tip app-name">{{about.appName}}</text>
 			<text class="tip">{{about.slogan}}</text>
 			<view @click="download" id="download">
 				<image v-if="isIos" class="icon" src="@/static/h5/download-app/ios.png" mode="widthFix"></image>
@@ -118,7 +118,7 @@
 		align-items: center;
 	}
 
-	.logoImg {
+	.logo-img {
 		margin-bottom: 10upx;
 		width: 160upx;
 		height: 160upx;
@@ -130,7 +130,7 @@
 		margin-top: 10px;
 	}
 
-	.appName {
+	.app-name {
 		margin-top: 20px;
 		font-size: 42rpx;
 		font-weight: 500;

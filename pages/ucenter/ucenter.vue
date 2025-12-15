@@ -14,16 +14,16 @@
 	<view class="center">
 
 		<!-- <uni-sign-in ref="signIn"></uni-sign-in> -->
-		<view class="userInfo" @click.capture="toUserInfo">
+		<view class="user-info" @click.capture="toUserInfo">
 			<cloud-image width="150rpx" height="150rpx" v-if="hasLogin&&userInfo.avatar_file&&userInfo.avatar_file.url" :src="userInfo.avatar_file.url"></cloud-image>
 			
-			<view v-else class="defaultAvatarUrl">
+			<view v-else class="default-avatar">
 				<uni-icons color="#ffffff" size="50" type="person-filled" />
 			</view>
 			
 			<view class="logo-title">
-				<text class="uer-name" v-if="hasLogin">{{userInfo.nickname||userInfo.username||userInfo.mobile}}</text>
-				<text class="uer-name" v-else>未登录</text>
+				<text class="user-name" v-if="hasLogin">{{userInfo.nickname||userInfo.username||userInfo.mobile}}</text>
+				<text class="user-name" v-else>未登录</text>
 			</view>
 		</view>
 		<uni-list class="center-list" v-for="(sublist , index) in ucenterList" :key="index">
@@ -349,7 +349,7 @@
 		width: 100%;
 	}
 
-	.userInfo {
+	.user-info {
 		padding-top: 60px;
 		padding-bottom: 40px;
 		background-image: linear-gradient(135deg, #42b983 0%, #359568 100%);
@@ -359,7 +359,7 @@
 		box-shadow: 0 4px 14px rgba(66, 185, 131, 0.2);
 	}
 
-	.defaultAvatarUrl {
+	.default-avatar {
 		width: 150rpx;
 		height: 150rpx;
 		background-color: rgba(255, 255, 255, 0.2);
@@ -371,7 +371,7 @@
 		transition: all 0.25s ease;
 	}
 
-	.defaultAvatarUrl:active {
+	.default-avatar:active {
 		transform: scale(0.95);
 	}
 
@@ -382,7 +382,7 @@
 		flex-direction: row;
 	}
 
-	.uer-name {
+	.user-name {
 		height: 100rpx;
 		line-height: 100rpx;
 		font-size: 38rpx;
@@ -394,33 +394,33 @@
 
 	/* PC 端用户信息优化 */
 	@media screen and (min-width: 768px) {
-		.userInfo {
+		.user-info {
 			padding-top: 80px;
 			padding-bottom: 50px;
 		}
 
-		.defaultAvatarUrl {
+		.default-avatar {
 			width: 180rpx;
 			height: 180rpx;
 		}
 
-		.uer-name {
+		.user-name {
 			font-size: 44rpx;
 		}
 	}
 
 	@media screen and (min-width: 1200px) {
-		.userInfo {
+		.user-info {
 			padding-top: 100px;
 			padding-bottom: 60px;
 		}
 
-		.defaultAvatarUrl {
+		.default-avatar {
 			width: 200rpx;
 			height: 200rpx;
 		}
 
-		.uer-name {
+		.user-name {
 			font-size: 48rpx;
 		}
 	}
