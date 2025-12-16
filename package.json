@@ -1,0 +1,122 @@
+{
+  "id": "uni-task",
+  "displayName": "uni-task",
+  "version": "2.1.5",
+  "description": "基于uni-app & uniCloud 的任务管理系统",
+  "keywords": [
+    "login",
+    "登录",
+    "搜索",
+    "uni-id实例",
+    "留言板"
+  ],
+  "repository": "",
+  "engines": {
+    "HBuilderX": "^3.2.6"
+  },
+  "dcloudext": {
+    "sale": {
+      "regular": {
+        "price": "0.00"
+      },
+      "sourcecode": {
+        "price": "0.00"
+      }
+    },
+    "contact": {
+      "qq": ""
+    },
+    "declaration": {
+      "ads": "无",
+      "data": "无",
+      "permissions": "无"
+    },
+    "npmurl": "",
+    "type": "unicloud-template-project"
+  },
+  "uni_modules": {
+    "dependencies": [
+      "uni-id-pages",
+      "uni-forms-item",
+      "uni-transition",
+      "uni-forms",
+      "uni-popup",
+      "uni-drawer",
+      "uni-tooltip",
+      "uni-dateformat",
+      "uni-link"
+    ],
+    "encrypt": [],
+    "platforms": {
+      "cloud": {
+        "tcb": "y",
+        "aliyun": "y"
+      },
+      "client": {
+        "App": {
+          "app-vue": "y",
+          "app-nvue": "u"
+        },
+        "H5-mobile": {
+          "Safari": "u",
+          "Android Browser": "u",
+          "微信浏览器(Android)": "u",
+          "QQ浏览器(Android)": "u"
+        },
+        "H5-pc": {
+          "Chrome": "y",
+          "IE": "n",
+          "Edge": "u",
+          "Firefox": "u",
+          "Safari": "u"
+        },
+        "小程序": {
+          "微信": "y",
+          "阿里": "u",
+          "百度": "u",
+          "字节跳动": "u",
+          "QQ": "u",
+          "京东": "u"
+        },
+        "快应用": {
+          "华为": "u",
+          "联盟": "u"
+        },
+        "Vue": {
+          "vue2": "y",
+          "vue3": "y"
+        }
+      }
+    }
+  },
+  "dependencies": {
+    "qrcodejs2": "^0.0.2",
+    "sortablejs": "^1.15.3"
+  },
+  "scripts": {
+    "logcat:web": "uni-logcat web",
+    "logcat:app-android": "uni-logcat app-android",
+    "logcat:app-ios": "uni-logcat app-ios",
+    "logcat:app-harmony": "uni-logcat app-harmony",
+    "logcat:mp-weixin": "uni-logcat mp-weixin",
+    "logcat:mp-alipay": "uni-logcat mp-alipay",
+    "logcat:mp-baidu": "uni-logcat mp-baidu",
+    "logcat:mp-xhs": "uni-logcat mp-xhs",
+    "logcat:mp-toutiao": "uni-logcat mp-toutiao",
+    "logcat:mp-qq": "uni-logcat mp-qq",
+    "logcat:mp-360": "uni-logcat mp-360",
+    "logcat:mp-kuaishou": "uni-logcat mp-kuaishou",
+    "logcat:mp-lark": "uni-logcat mp-lark",
+    "logcat:mp-jd": "uni-logcat mp-jd",
+    "logcat:quickapp-huawei": "uni-logcat quickapp-webview-huawei",
+    "logcat:quickapp-union": "uni-logcat quickapp-webview-union",
+    "test:web": "uni-test web",
+    "test:app-android": "uni-test app-android",
+    "test:app-ios": "uni-test app-ios",
+    "test:app-harmony": "uni-test app-harmony",
+    "test:mp-weixin": "uni-test mp-weixin"
+  },
+  "devDependencies": {
+    "@dcloudio/hbuilderx-cli": "^1.1.2"
+  }
+}
