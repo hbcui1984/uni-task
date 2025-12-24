@@ -48,9 +48,6 @@
                 <text v-else class="mobile-no-deadline">无截止日期</text>
               </view>
             </view>
-            <view class="mobile-action-btn" @click.stop="showMobileActionMenu(item._id)">
-              <uni-icons type="more-filled" size="18" color="#6c757d"></uni-icons>
-            </view>
           </view>
 
           <!-- PC端：原有布局 -->
@@ -234,9 +231,6 @@
                 </view>
                 <text v-else class="mobile-no-deadline">无截止日期</text>
               </view>
-            </view>
-            <view class="mobile-action-btn" @click.stop="showMobileActionMenu(item._id)">
-              <uni-icons type="more-filled" size="18" color="#6c757d"></uni-icons>
             </view>
           </view>
 
@@ -645,25 +639,6 @@ export default {
     editTask(taskId) {
       this.$emit('edit-task', taskId)
     },
-    // 移动端操作菜单
-    showMobileActionMenu(taskId) {
-      uni.showActionSheet({
-        itemList: ['完成任务', '编辑任务', '删除任务'],
-        success: (res) => {
-          switch (res.tapIndex) {
-            case 0:
-              this.finishTask(taskId)
-              break
-            case 1:
-              this.editTask(taskId)
-              break
-            case 2:
-              this.deleteTask(taskId)
-              break
-          }
-        }
-      })
-    },
     // ========== 优先级下拉 ==========
     togglePriorityDropdown(taskId, currentPriority) {
       // 关闭其他下拉框
@@ -737,28 +712,6 @@ export default {
 }
 
 /* 样式已移至无 scoped 块 */
-
-/* 移动端操作按钮 */
-.mobile-action-btn {
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background-color: #f7f8fa;
-  z-index: 10;
-  transition: all 0.2s ease;
-}
-
-.mobile-action-btn:active {
-  background-color: #e6fcf5;
-  transform: translateY(-50%) scale(0.95);
-}
 
 /* PC端悬浮操作按钮 */
 .task-hover-actions {
@@ -1368,15 +1321,6 @@ export default {
 .mobile-no-deadline {
   font-size: 12px;
   color: #9ca3af;
-}
-
-/* 移动端操作按钮调整 */
-.task-item-mobile .mobile-action-btn {
-  position: relative;
-  right: auto;
-  top: auto;
-  transform: none;
-  flex-shrink: 0;
 }
 </style>
 
