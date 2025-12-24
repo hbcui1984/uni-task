@@ -251,6 +251,8 @@
 						icon: 'success',
 						duration: 1500
 					})
+					// 通知父页面刷新数据
+					this.getOpenerEventChannel().emit('refreshData')
 				}).catch(err => {
 					console.error("更新失败:", err)
 					uni.showToast({
