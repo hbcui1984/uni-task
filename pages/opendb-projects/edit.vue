@@ -78,6 +78,11 @@
 						:disabled="!isManager"
 					></textarea>
 				</uni-forms-item>
+
+				<!-- 保存按钮 -->
+				<view class="form-button-group" v-if="isManager">
+					<button type="primary" class="uni-button" @click="submit">保存修改</button>
+				</view>
 			</view>
 
 			<!-- 项目统计 -->
@@ -176,11 +181,6 @@
 				</view>
 			</view>
 
-			<!-- 按钮组 -->
-			<view class="uni-button-group">
-				<button type="default" class="uni-button btn-cancel" @click="handleCancel">返回</button>
-				<button v-if="isManager" type="primary" class="uni-button" @click="submit">保存修改</button>
-			</view>
 		</uni-forms>
 
 		<!-- 权限提示 -->
@@ -1216,17 +1216,14 @@
 		}
 	}
 
-	/* 按钮组 */
-	.uni-button-group {
-		padding: 24px;
-		display: flex;
-		justify-content: center;
-		gap: 16px;
-		background-color: #f7f8fa;
-		border-top: 1px solid #e9ecef;
+	/* 表单内保存按钮 */
+	.form-button-group {
+		margin-top: 20px;
+		padding-top: 16px;
 
-		@media screen and (min-width: 768px) {
-			padding: 28px 40px;
+		.uni-button {
+			width: 100%;
+			max-width: none;
 		}
 	}
 
