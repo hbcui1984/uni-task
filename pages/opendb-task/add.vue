@@ -407,7 +407,13 @@ export default {
 
 		submitForm(value) {
 
-			// 添加附件和截止日期到提交数据
+			// 添加不在 uni-forms-item 中的字段到提交数据
+			if (this.formData.assignee) {
+				value.assignee = this.formData.assignee
+			}
+			if (this.formData.priority !== undefined) {
+				value.priority = this.formData.priority
+			}
 			if (this.attachments.length > 0) {
 				value.attachments = this.attachments
 			}
