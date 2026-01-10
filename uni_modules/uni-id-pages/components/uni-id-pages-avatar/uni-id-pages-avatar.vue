@@ -47,6 +47,8 @@
 		},
 		async mounted() {
 			// #ifdef H5
+			
+			
 			this.isPC = !['ios', 'android'].includes(uni.getSystemInfoSync().platform);
 			// #endif
 		},
