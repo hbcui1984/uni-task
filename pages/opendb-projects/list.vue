@@ -22,20 +22,25 @@
 				<button type="default" @click="addProject" class="uni-button">新建项目</button>
 			</view>
 		</view>
-		<unicloud-db ref="udb" v-slot:default="{data, pagination, loading, hasMore, error}" collection="opendb-projects"
-			where="(managers==$cloudEnv_uid || members==$cloudEnv_uid) && archived != true" field="_id,name,cover,description" load>
-			<view v-if="error">{{error.message}}</view>
-			<view v-else-if="data">
-				<uni-list>
-					<uni-list-item v-for="(item, index) in data" :key="index" showArrow :clickable="true"
-						@click="handleItemClick(item._id,item.name)">
-						<template v-slot:body>
-							{{item.name}}
-						</template>
-					</uni-list-item>
-				</uni-list>
-			</view>
-		</unicloud-db>
+		<view v-if="error" class="error-message">{{error}}</view>
+		<view v-else-if="loading" class="loading-state">
+			<uni-load-more status="loading"></uni-load-more>
+		</view>
+		<view v-else-if="projectList && projectList.length > 0">
+			<uni-list>
+				<uni-list-item v-for="(item, index) in projectList" :key="index" showArrow :clickable="true"
+					@click="handleItemClick(item._id, item.name)">
+					<template v-slot:body>
+						{{item.name}}
+					</template>
+				</uni-list-item>
+			</uni-list>
+		</view>
+		<view v-else class="empty-state">
+			<uni-icons type="folder" size="48" color="#e9ecef"></uni-icons>
+			<text class="empty-text">暂无项目</text>
+			<text class="empty-hint">点击上方按钮新建项目或加入已有项目</text>
+		</view>
 
 		<!-- 已归档项目入口 -->
 		<view class="archived-link" @click="gotoArchivedProjects">
@@ -46,38 +51,54 @@
 </template>
 
 <script>
+	const projectCo = uniCloud.importObject('project-co')
+
 	export default {
 		data() {
 			return {
-				loadMore: {
-					contentdown: '',
-					contentrefresh: '',
-					contentnomore: ''
-				}
+				projectList: [],
+				loading: false,
+				error: null
 			}
 		},
 		onPullDownRefresh() {
-			// this.$refs.udb.loadData({
-			// 	clear: true
-			// }, () => {
-			// 	uni.stopPullDownRefresh()
-			// })
-		},
-		onReachBottom() {
-			this.$refs.udb.loadMore()
+			this.loadData().then(() => {
+				uni.stopPullDownRefresh()
+			})
 		},
 		onLoad() {
-			uni.$on('refresh-projects', (data) => {
-				this.$refs.udb && this.$refs.udb.loadData()
+			uni.$on('refresh-projects', () => {
+				this.loadData()
 			})
 		},
 		onReady() {
-			this.$refs.udb.loadData()
+			this.loadData()
 		},
 		onShow() {
-			//this.$refs.udb && this.$refs.udb.loadData()
+			// 每次显示时刷新数据
+			this.loadData()
 		},
 		methods: {
+			async loadData() {
+				this.loading = true
+				this.error = null
+				try {
+					const res = await projectCo.getMyProjects({ archived: false })
+					if (res.errCode === 0) {
+						// 确保 _id 是字符串格式（传统 API 可能返回 ObjectId 对象）
+						this.projectList = (res.data || []).map(item => ({
+							...item,
+							_id: String(item._id)
+						}))
+					} else {
+						this.error = res.errMsg || '加载失败'
+					}
+				} catch (e) {
+					this.error = e.message || '加载失败'
+				} finally {
+					this.loading = false
+				}
+			},
 			handleItemClick(id, name) {
 				uni.navigateTo({
 					url: '/pages/opendb-task/list?id=' + id + "&name=" + name
@@ -90,9 +111,7 @@
 					events: {
 						// 监听新增数据成功后, 刷新当前页面数据
 						refreshData: () => {
-							this.$refs.udb.loadData({
-								clear: true
-							})
+							this.loadData()
 						}
 					}
 				})
@@ -305,7 +324,7 @@
 	/* uni-list / uni-load-more 样式已移至无 scoped 块 */
 
 	/* 错误提示 */
-	view[v-if="error"] {
+	.error-message {
 		padding: 40px;
 		text-align: center;
 		background-color: #fef0f0;
@@ -313,6 +332,37 @@
 		border-radius: 8px;
 		color: #e74c3c;
 		font-size: 14px;
+	}
+
+	/* 加载状态 */
+	.loading-state {
+		padding: 40px;
+		text-align: center;
+	}
+
+	/* 空状态 */
+	.empty-state {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		padding: 64px 24px;
+		background-color: #ffffff;
+		border-radius: 12px;
+		border: 2px dashed #e9ecef;
+	}
+
+	.empty-text {
+		margin-top: 16px;
+		color: #6c757d;
+		font-size: 16px;
+		font-weight: 500;
+	}
+
+	.empty-hint {
+		margin-top: 8px;
+		color: #adb5bd;
+		font-size: 13px;
 	}
 
 	/* 已归档项目入口 */

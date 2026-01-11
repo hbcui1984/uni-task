@@ -70,10 +70,12 @@
 			"parentKey": "_id"
 		},
 		"project_id": {
+			"bsonType": "string",
 			"description": "项目ID",
 			"foreignKey": "opendb-projects._id"
 		},
 		"group_id": {
+			"bsonType": "string",
 			"description": "分组ID",
 			"foreignKey": "task-group._id"
 		},

@@ -61,6 +61,71 @@ async function checkIsManager(projectId, uid) {
 
 module.exports = {
 	/**
+	 * 获取当前用户的项目列表
+	 *
+	 * 功能说明：
+	 * - 获取用户作为管理员或成员参与的所有项目
+	 * - 支持按归档状态过滤
+	 * - 使用传统数据库 API 确保跨云服务商兼容性
+	 *
+	 * @param {Object} params - 查询参数
+	 * @param {boolean} [params.archived=false] - 是否查询已归档项目
+	 * @returns {Object} { errCode: 0, data: Array<Project> }
+	 */
+	async getMyProjects(params = {}) {
+		const uid = this.userInfo.uid
+		const archived = params.archived === true
+
+		try {
+			// 传统方式：数组包含判断使用 dbCmd.all([value])
+			let whereCondition
+			if (archived) {
+				// 查询已归档项目
+				whereCondition = dbCmd.and([
+					dbCmd.or([
+						{ managers: dbCmd.all([uid]) },
+						{ members: dbCmd.all([uid]) }
+					]),
+					{ archived: true }
+				])
+			} else {
+				// 查询未归档项目（archived 不存在、为 false 或为 null）
+				whereCondition = dbCmd.and([
+					dbCmd.or([
+						{ managers: dbCmd.all([uid]) },
+						{ members: dbCmd.all([uid]) }
+					]),
+					dbCmd.or([
+						{ archived: dbCmd.exists(false) },
+						{ archived: false },
+						{ archived: null }
+					])
+				])
+			}
+
+			const result = await db.collection('opendb-projects')
+				.where(whereCondition)
+				.field({
+					_id: true,
+					name: true,
+					cover: true,
+					description: true,
+					archived_date: true,
+					managers: true
+				})
+				.get()
+
+			return {
+				errCode: 0,
+				data: result.data || []
+			}
+		} catch (e) {
+			console.error('getMyProjects error:', e)
+			return { errCode: 'QUERY_FAILED', errMsg: e.message, data: [] }
+		}
+	},
+
+	/**
 	 * 前置钩子 - 验证用户登录状态
 	 *
 	 * 功能说明：

@@ -130,7 +130,7 @@
 			orderby="group_id.order asc, order asc"
 			loadtime="manual"
 			@load="dataLoadHandle">
-			
+
 			<view v-if="error" class="error-message">{{ error.message }}</view>
 			<view v-else-if="data">
 				<TaskList
@@ -332,12 +332,15 @@
 					return ''
 				}
 
+				// 确保 project_id 是字符串格式
+				const projectId = String(this.project_id)
+
 				const db = uniCloud.database()
 				const dbCmd = db.command
 
 				// 构建主表查询条件
 				const mainTableConditions = {
-					project_id: this.project_id,
+					project_id: projectId,
 					status: dbCmd.neq(2),
 					// 排除子任务（parent_id 为空或不存在的才是主任务）
 					parent_id: dbCmd.exists(false).or(dbCmd.eq('').or(dbCmd.eq(null)))
