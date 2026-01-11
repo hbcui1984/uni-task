@@ -124,36 +124,30 @@
 		</uni-popup>
 		
 		<!-- 任务列表组件 -->
-		<unicloud-db ref="udb" v-slot:default="{ data, loading, error }"
-			:collection="dbCollection"
-			field="group_id{_id,name,order},title,content,assignee{nickname},deadline,order,priority"
-			orderby="group_id.order asc, order asc"
-			loadtime="manual"
-			@load="dataLoadHandle">
-
-			<view v-if="error" class="error-message">{{ error.message }}</view>
-			<view v-else-if="data">
-				<TaskList
-					:tasks="taskList"
-					:groups="groupList"
-					:members="members"
-					:hasFilter="hasActiveFilter"
-					@task-click="handleTaskClick"
-					@finish-task="finishTask"
-					@set-assignee="handleSetAssignee"
-					@save-deadline="setDeadline"
-					@open-deadline-picker="openDeadlinePopup"
-					@edit-group="openEditGroupPopup"
-					@archive-group="archiveGroup"
-					@delete-group="deleteGroup"
-					@delete-task="deleteTask"
-					@edit-task="editTask"
-					@change-priority="handlePriorityChange"
-					@add-task="addTask"
-				/>
-			</view>
-			<uni-load-more v-if="loading" :contentText="loadMore" status="loading"></uni-load-more>
-		</unicloud-db>
+		<view v-if="taskError" class="error-message">{{ taskError }}</view>
+		<view v-else-if="taskLoading" class="loading-state">
+			<uni-load-more status="loading"></uni-load-more>
+		</view>
+		<view v-else>
+			<TaskList
+				:tasks="taskList"
+				:groups="groupList"
+				:members="members"
+				:hasFilter="hasActiveFilter"
+				@task-click="handleTaskClick"
+				@finish-task="finishTask"
+				@set-assignee="handleSetAssignee"
+				@save-deadline="setDeadline"
+				@open-deadline-picker="openDeadlinePopup"
+				@edit-group="openEditGroupPopup"
+				@archive-group="archiveGroup"
+				@delete-group="deleteGroup"
+				@delete-task="deleteTask"
+				@edit-task="editTask"
+				@change-priority="handlePriorityChange"
+				@add-task="addTask"
+			/>
+		</view>
 
 		<!-- 底部快捷链接 -->
 		<view class="bottom-links">
@@ -283,6 +277,8 @@
 				project_id: '',
 				taskList: [],
 				groupList: [],
+				taskLoading: false,
+				taskError: null,
 				needRefresh: false,
 				loadMore: {
 					contentdown: '',
@@ -324,44 +320,6 @@
 			hasActiveFilter() {
 				// 注意：filterPriority 可以是 0（较低），不能直接用 !! 判断
 				return !!(this.filterAssignee || this.filterPriority !== '')
-			},
-			// 使用 getTemp 构建联表查询，先过滤主表数据
-			dbCollection() {
-				// project_id 为空时返回空字符串，避免无效查询
-				if (!this.project_id) {
-					return ''
-				}
-
-				// 确保 project_id 是字符串格式
-				const projectId = String(this.project_id)
-
-				const db = uniCloud.database()
-				const dbCmd = db.command
-
-				// 构建主表查询条件
-				const mainTableConditions = {
-					project_id: projectId,
-					status: dbCmd.neq(2),
-					// 排除子任务（parent_id 为空或不存在的才是主任务）
-					parent_id: dbCmd.exists(false).or(dbCmd.eq('').or(dbCmd.eq(null)))
-				}
-
-				// 负责人筛选
-				if (this.filterAssignee) {
-					mainTableConditions.assignee = this.filterAssignee
-				}
-
-				// 优先级筛选（注意：0 是有效值，表示"较低"优先级）
-				if (this.filterPriority !== '') {
-					mainTableConditions.priority = this.filterPriority
-				}
-
-				// 使用 getTemp 先过滤主表，并指定字段避免权限问题
-				const taskTemp = db.collection('opendb-task').where(mainTableConditions).getTemp()
-				const userTemp = db.collection('uni-id-users').field('_id,nickname').getTemp()
-				const groupTemp = db.collection('task-group').field('_id,name,order').getTemp()
-
-				return [taskTemp, userTemp, groupTemp]
 			}
 		},
 		onLoad(event) {
@@ -380,17 +338,17 @@
 			// 加载项目成员
 			this.loadProjectMembers()
 
-			// 手动加载任务数据
+			// 加载任务数据
 			this.$nextTick(() => {
-				if (this.$refs.udb && this.project_id) {
-					this.$refs.udb.loadData()
+				if (this.project_id) {
+					this.loadTaskList()
 				}
 			})
 		},
 		onShow() {
 			// 只有标记了需要刷新时才刷新（从新增/编辑页面返回时）
-			if (this.needRefresh && this.$refs.udb && this.project_id) {
-				this.$refs.udb.loadData({ clear: true })
+			if (this.needRefresh && this.project_id) {
+				this.loadTaskList()
 				this.needRefresh = false
 			}
 		},
@@ -399,14 +357,9 @@
 			this.needRefresh = true
 		},
 		onPullDownRefresh() {
-			this.$refs.udb.loadData({
-				clear: true
-			}, () => {
+			this.loadTaskList().then(() => {
 				uni.stopPullDownRefresh()
 			})
-		},
-		onReachBottom() {
-			this.$refs.udb.loadMore()
 		},
 		methods: {
 			// 返回上一页
@@ -431,6 +384,120 @@
 					return task.group_id
 				}
 				return null
+			},
+
+			// 加载任务列表（使用传统 API 替代 unicloud-db + getTemp）
+			async loadTaskList() {
+				if (!this.project_id) return
+
+				this.taskLoading = true
+				this.taskError = null
+
+				try {
+					const db = uniCloud.database()
+					const dbCmd = db.command
+					const projectId = String(this.project_id)
+
+					// 构建查询条件
+					const whereCondition = {
+						project_id: projectId,
+						status: dbCmd.neq(2),
+						// 排除子任务
+						parent_id: dbCmd.exists(false).or(dbCmd.eq('').or(dbCmd.eq(null)))
+					}
+
+					// 负责人筛选
+					if (this.filterAssignee) {
+						whereCondition.assignee = this.filterAssignee
+					}
+
+					// 优先级筛选
+					if (this.filterPriority !== '') {
+						whereCondition.priority = this.filterPriority
+					}
+
+					// 查询任务列表
+					const { result } = await db.collection('opendb-task')
+						.where(whereCondition)
+						.field('_id,title,content,assignee,group_id,deadline,order,priority')
+						.orderBy('order', 'asc')
+						.get()
+
+					let tasks = result.data || []
+
+					// 获取所有需要查询的 assignee ID
+					const assigneeIds = [...new Set(tasks.map(t => t.assignee).filter(Boolean))]
+
+					// 批量查询负责人信息
+					if (assigneeIds.length > 0) {
+						const { result: userResult } = await db.collection('uni-id-users')
+							.where({ _id: dbCmd.in(assigneeIds) })
+							.field('_id,nickname')
+							.get()
+
+						const userMap = {}
+						userResult.data.forEach(u => {
+							userMap[u._id] = u
+						})
+
+						// 将 assignee 转换为数组格式（兼容原有模板）
+						tasks = tasks.map(task => ({
+							...task,
+							assignee: task.assignee && userMap[task.assignee]
+								? [{ _id: task.assignee, nickname: userMap[task.assignee].nickname }]
+								: []
+						}))
+					} else {
+						tasks = tasks.map(task => ({ ...task, assignee: [] }))
+					}
+
+					// 获取所有需要查询的 group_id
+					const groupIds = [...new Set(tasks.map(t => t.group_id).filter(Boolean))]
+
+					// 批量查询分组信息
+					if (groupIds.length > 0) {
+						const { result: groupResult } = await db.collection('task-group')
+							.where({ _id: dbCmd.in(groupIds) })
+							.field('_id,name,order')
+							.get()
+
+						const groupMap = {}
+						groupResult.data.forEach(g => {
+							groupMap[g._id] = g
+						})
+
+						// 将 group_id 转换为数组格式（兼容原有模板）
+						tasks = tasks.map(task => ({
+							...task,
+							group_id: task.group_id && groupMap[task.group_id]
+								? [groupMap[task.group_id]]
+								: []
+						}))
+					} else {
+						tasks = tasks.map(task => ({ ...task, group_id: [] }))
+					}
+
+					// 按分组排序
+					tasks.sort((a, b) => {
+						const aGroupOrder = a.group_id?.[0]?.order ?? 999999
+						const bGroupOrder = b.group_id?.[0]?.order ?? 999999
+						if (aGroupOrder !== bGroupOrder) {
+							return aGroupOrder - bGroupOrder
+						}
+						return (a.order ?? 0) - (b.order ?? 0)
+					})
+
+					this.taskList = tasks
+
+					// 加载分组和子任务统计
+					await this.loadGroups()
+					await this.loadSubtaskCounts()
+				} catch (e) {
+					console.error('加载任务列表失败:', e)
+					this.taskError = e.message || '加载失败'
+				} finally {
+					this.taskLoading = false
+				}
 			},
 
 			// 数据加载处理
@@ -502,7 +569,7 @@
 			// 筛选变化处理
 			handleFilterChange() {
 				this.$nextTick(() => {
-					this.$refs.udb.loadData({ clear: true })
+					this.loadTaskList()
 				})
 			},
 
@@ -800,7 +867,7 @@
 					events: {
 						refreshData: () => {
 							// 刷新任务列表
-							this.$refs.udb.loadData({ clear: true })
+							this.loadTaskList()
 						}
 					}
 				})
@@ -948,7 +1015,7 @@
 
 								await this.loadGroups()
 								// 刷新任务列表
-								this.$refs.udb.loadData({ clear: true })
+								this.loadTaskList()
 
 								uni.showToast({
 									title: '分组已删除',
@@ -1518,6 +1585,11 @@
 	background-color: #fdecea;
 	border-radius: 8px;
 	font-weight: 500;
+}
+
+.loading-state {
+	padding: 40px;
+	text-align: center;
 }
 
 /* 弹出层样式 */
