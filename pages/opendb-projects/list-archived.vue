@@ -17,45 +17,43 @@
 			</view>
 		</view>
 
-		<view v-if="error" class="error-message">{{error}}</view>
-		<view v-else-if="loading" class="loading-state">
-			<uni-load-more status="loading"></uni-load-more>
-		</view>
-		<view v-else-if="projectList && projectList.length > 0">
-			<uni-list>
-				<uni-list-item v-for="(item, index) in projectList" :key="index" showArrow :clickable="true"
-					@click="handleItemClick(item._id, item.name)">
-					<template v-slot:body>
-						<view class="project-item">
-							<view class="project-name">{{item.name}}</view>
-							<view class="project-meta">
-								<text class="archived-date" v-if="item.archived_date">
-									归档于 {{formatDate(item.archived_date)}}
-								</text>
+		<unicloud-db ref="udb" v-slot:default="{data, loading, error}" collection="opendb-projects"
+			where="(managers==$cloudEnv_uid || members==$cloudEnv_uid) && archived == true"
+			field="_id,name,cover,description,archived_date,managers" :getone="false">
+			<view v-if="error" class="error-message">{{error.message}}</view>
+			<view v-else-if="loading" class="loading-state">
+				<uni-load-more status="loading"></uni-load-more>
+			</view>
+			<view v-else-if="data && data.length > 0">
+				<uni-list>
+					<uni-list-item v-for="(item, index) in data" :key="index" showArrow :clickable="true"
+						@click="handleItemClick(item._id, item.name)">
+						<template v-slot:body>
+							<view class="project-item">
+								<view class="project-name">{{item.name}}</view>
+								<view class="project-meta">
+									<text class="archived-date" v-if="item.archived_date">
+										归档于 {{formatDate(item.archived_date)}}
+									</text>
+								</view>
 							</view>
-						</view>
-					</template>
-				</uni-list-item>
-			</uni-list>
-		</view>
-		<view v-else class="empty-state">
-			<uni-icons type="folder" size="48" color="#e9ecef"></uni-icons>
-			<text class="empty-text">暂无已归档项目</text>
-			<text class="empty-hint">归档的项目会显示在这里</text>
-		</view>
+						</template>
+					</uni-list-item>
+				</uni-list>
+			</view>
+			<view v-else class="empty-state">
+				<uni-icons type="folder" size="48" color="#e9ecef"></uni-icons>
+				<text class="empty-text">暂无已归档项目</text>
+				<text class="empty-hint">归档的项目会显示在这里</text>
+			</view>
+		</unicloud-db>
 	</view>
 </template>
 
 <script>
-	const projectCo = uniCloud.importObject('project-co')
-
 	export default {
 		data() {
-			return {
-				projectList: [],
-				loading: false,
-				error: null
-			}
+			return {}
 		},
 		onLoad() {
 			uni.setNavigationBarTitle({
@@ -63,29 +61,9 @@
 			})
 		},
 		onReady() {
-			this.loadData()
+			this.$refs.udb.loadData()
 		},
 		methods: {
-			async loadData() {
-				this.loading = true
-				this.error = null
-				try {
-					const res = await projectCo.getMyProjects({ archived: true })
-					if (res.errCode === 0) {
-						// 确保 _id 是字符串格式（传统 API 可能返回 ObjectId 对象）
-						this.projectList = (res.data || []).map(item => ({
-							...item,
-							_id: String(item._id)
-						}))
-					} else {
-						this.error = res.errMsg || '加载失败'
-					}
-				} catch (e) {
-					this.error = e.message || '加载失败'
-				} finally {
-					this.loading = false
-				}
-			},
 			handleItemClick(id, name) {
 				uni.navigateTo({
 					url: '/pages/opendb-task/list?id=' + id + "&name=" + name

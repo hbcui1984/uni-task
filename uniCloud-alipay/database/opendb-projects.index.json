@@ -1,0 +1,28 @@
+[
+    {
+        "IndexName": "managers",
+        "MgoKeySchema": {
+            "MgoIndexKeys": [
+                {
+                    "Name": "managers",
+                    "Direction": "",
+                    "Type": "array"
+                }
+            ],
+            "MgoIsUnique": false
+        }
+    },
+    {
+        "IndexName": "members",
+        "MgoKeySchema": {
+            "MgoIndexKeys": [
+                {
+                    "Name": "members",
+                    "Direction": "",
+                    "Type": "array"
+                }
+            ],
+            "MgoIsUnique": false
+        }
+    }
+]

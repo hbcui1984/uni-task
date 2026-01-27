@@ -22,25 +22,29 @@
 				<button type="default" @click="addProject" class="uni-button">新建项目</button>
 			</view>
 		</view>
-		<view v-if="error" class="error-message">{{error}}</view>
-		<view v-else-if="loading" class="loading-state">
-			<uni-load-more status="loading"></uni-load-more>
-		</view>
-		<view v-else-if="projectList && projectList.length > 0">
-			<uni-list>
-				<uni-list-item v-for="(item, index) in projectList" :key="index" showArrow :clickable="true"
-					@click="handleItemClick(item._id, item.name)">
-					<template v-slot:body>
-						{{item.name}}
-					</template>
-				</uni-list-item>
-			</uni-list>
-		</view>
-		<view v-else class="empty-state">
-			<uni-icons type="folder" size="48" color="#e9ecef"></uni-icons>
-			<text class="empty-text">暂无项目</text>
-			<text class="empty-hint">点击上方按钮新建项目或加入已有项目</text>
-		</view>
+		<unicloud-db ref="udb" v-slot:default="{data, loading, error}" collection="opendb-projects"
+			where="(managers==$cloudEnv_uid || members==$cloudEnv_uid) && archived != true"
+			field="_id,name,cover,description">
+			<view v-if="error" class="error-message">{{error.message}}</view>
+			<view v-else-if="loading" class="loading-state">
+				<uni-load-more status="loading"></uni-load-more>
+			</view>
+			<view v-else-if="data && data.length > 0">
+				<uni-list>
+					<uni-list-item v-for="(item, index) in data" :key="index" showArrow :clickable="true"
+						@click="handleItemClick(item._id, item.name)">
+						<template v-slot:body>
+							{{item.name}}
+						</template>
+					</uni-list-item>
+				</uni-list>
+			</view>
+			<view v-else class="empty-state">
+				<uni-icons type="folder" size="48" color="#e9ecef"></uni-icons>
+				<text class="empty-text">暂无项目</text>
+				<text class="empty-hint">点击上方按钮新建项目或加入已有项目</text>
+			</view>
+		</unicloud-db>
 
 		<!-- 已归档项目入口 -->
 		<view class="archived-link" @click="gotoArchivedProjects">
@@ -51,54 +55,27 @@
 </template>
 
 <script>
-	const projectCo = uniCloud.importObject('project-co')
-
 	export default {
 		data() {
-			return {
-				projectList: [],
-				loading: false,
-				error: null
-			}
+			return {}
 		},
 		onPullDownRefresh() {
-			this.loadData().then(() => {
+			this.$refs.udb.loadData({
+				clear: true
+			}, () => {
 				uni.stopPullDownRefresh()
 			})
 		},
 		onLoad() {
 			uni.$on('refresh-projects', () => {
-				this.loadData()
+				this.$refs.udb && this.$refs.udb.loadData()
 			})
-		},
-		onReady() {
-			this.loadData()
 		},
 		onShow() {
 			// 每次显示时刷新数据
-			this.loadData()
+			this.$refs.udb && this.$refs.udb.loadData()
 		},
 		methods: {
-			async loadData() {
-				this.loading = true
-				this.error = null
-				try {
-					const res = await projectCo.getMyProjects({ archived: false })
-					if (res.errCode === 0) {
-						// 确保 _id 是字符串格式（传统 API 可能返回 ObjectId 对象）
-						this.projectList = (res.data || []).map(item => ({
-							...item,
-							_id: String(item._id)
-						}))
-					} else {
-						this.error = res.errMsg || '加载失败'
-					}
-				} catch (e) {
-					this.error = e.message || '加载失败'
-				} finally {
-					this.loading = false
-				}
-			},
 			handleItemClick(id, name) {
 				uni.navigateTo({
 					url: '/pages/opendb-task/list?id=' + id + "&name=" + name
@@ -111,7 +88,9 @@
 					events: {
 						// 监听新增数据成功后, 刷新当前页面数据
 						refreshData: () => {
-							this.loadData()
+							this.$refs.udb.loadData({
+								clear: true
+							})
 						}
 					}
 				})

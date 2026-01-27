@@ -8,25 +8,6 @@
 		"update": "auth.uid != null",
 		"delete": false
 	},
-	"indexes": [{
-		"IndexName": "managers",
-		"MgoKeySchema": {
-			"MgoIndexKeys": [{
-				"Name": "managers",
-				"Direction": "1"
-			}],
-			"MgoIsUnique": false
-		}
-	}, {
-		"IndexName": "members",
-		"MgoKeySchema": {
-			"MgoIndexKeys": [{
-				"Name": "members",
-				"Direction": "1"
-			}],
-			"MgoIsUnique": false
-		}
-	}],
 	"properties": {
 		"_id": {
 			"description": "ID，系统自动生成"
